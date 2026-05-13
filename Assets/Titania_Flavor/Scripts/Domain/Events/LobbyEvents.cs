@@ -15,4 +15,5 @@ public static class LobbyEvents
 
     public static Action<int> OnPlayerCountChanged;
 
+    public static Action<string, string> OnRoomCreated;
 }

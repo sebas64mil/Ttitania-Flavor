@@ -1,12 +1,15 @@
 using Fusion;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 public class LobbyNetwork : MonoBehaviour
 {
     public static LobbyNetwork Instance;
 
     private NetworkRunner runner;
+    private string currentRoomCode;
+    private GameMode currentGameMode;
 
     private void Awake()
     {
@@ -26,9 +29,9 @@ public class LobbyNetwork : MonoBehaviour
     // HOST
     // =========================
 
-    public void HostGame(string sceneName)
+    public void HostGame(string sceneName, string roomName = "")
     {
-        StartGame(GameMode.Host, sceneName);
+        StartGame(GameMode.Host, sceneName, roomName, "");
         GameManager.Instance.ChangeScene(sceneName);
     }
 
@@ -36,9 +39,15 @@ public class LobbyNetwork : MonoBehaviour
     // CLIENT
     // =========================
 
-    public void JoinGame(string sceneName)
+    public void JoinGame(string sceneName, string roomCode = "")
     {
-        StartGame(GameMode.Client, sceneName);
+        if (string.IsNullOrEmpty(roomCode))
+        {
+            Debug.LogError("No se puede unir sin un código de sala válido");
+            return;
+        }
+
+        StartGame(GameMode.Client, sceneName, "", roomCode);
         GameManager.Instance.ChangeScene(sceneName);
     }
 
@@ -46,13 +55,16 @@ public class LobbyNetwork : MonoBehaviour
     // START
     // =========================
 
-    private async void StartGame(GameMode mode, string sceneName)
+    private async void StartGame(GameMode mode, string sceneName, string roomName = "", string roomCode = "")
     {
         if (runner != null)
+        {
+            Debug.LogWarning("Ya existe un NetworkRunner activo");
             return;
+        }
 
+        currentGameMode = mode;
         runner = gameObject.AddComponent<NetworkRunner>();
-
         runner.ProvideInput = true;
 
         // CALLBACKS
@@ -67,23 +79,103 @@ public class LobbyNetwork : MonoBehaviour
 
         // OBTENER SCENE REF
         int buildIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Titania_Flavor/Scenes/{sceneName}.unity");
-
         SceneRef scene = SceneRef.FromIndex(buildIndex);
 
-        Debug.Log($"Scene Path: Assets/Titania_Flavor/Scenes/{sceneName}.unity");
-        Debug.Log($"Build Index: {buildIndex}");
-        Debug.Log($"Scene Ref: {scene}");
 
-        await runner.StartGame(new StartGameArgs()
+        string sessionName;
+        
+        if (mode == GameMode.Host)
         {
-            GameMode = mode,
+            // El host genera un nuevo código de sala
+            currentRoomCode = GenerateRoomCode();
+            sessionName = currentRoomCode;
+            
+            Debug.Log($"[LobbyNetwork] HOST creado con código: {currentRoomCode}");
+        }
+        else
+        {
+            // El cliente se une usando el código proporcionado
+            currentRoomCode = roomCode;
+            sessionName = roomCode;
+            
+            Debug.Log($"[LobbyNetwork] CLIENT intentando unirse a sala: {roomCode}");
+        }
 
-            SessionName = "TestRoom",
 
-            Scene = scene,
+        Debug.Log($"Iniciando juego en modo {mode} con sesión '{sessionName}' y código de sala '{currentRoomCode}'");
 
-            SceneManager = sceneManager
-        });
+        try
+        {
+            await runner.StartGame(new StartGameArgs()
+            {
+                GameMode = mode,
+                SessionName = sessionName,
+                Scene = scene,
+                SceneManager = sceneManager
+            });
+
+            Debug.Log($"[LobbyNetwork] Conexión exitosa en modo {mode}");
+
+            if (mode == GameMode.Host)
+            {
+                LobbyEvents.OnRoomCreated?.Invoke(sessionName, currentRoomCode);
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[LobbyNetwork] Error al iniciar juego: {ex.Message}\n{ex.StackTrace}");
+            
+            if (runner != null)
+            {
+                Destroy(runner);
+                runner = null;
+            }
+        }
+    }
+
+    private string GenerateRoomCode()
+    {
+        return Random.Range(1000, 9999).ToString();
+    }
+
+    public int GetPlayerCount()
+    {
+        if (runner != null && runner.IsRunning)
+        {
+            return runner.ActivePlayers.Count();
+        }
+
+        return 0;
+    }
+
+    public string GetRoomCode()
+    {
+        return currentRoomCode;
+    }
+
+    public string GetSessionName()
+    {
+        if (runner != null)
+        {
+            return runner.SessionInfo.Name;
+        }
+
+        return string.Empty;
+    }
+
+    public GameMode GetGameMode()
+    {
+        return currentGameMode;
+    }
+
+    public bool IsHost()
+    {
+        return currentGameMode == GameMode.Host;
+    }
+
+    public bool IsClient()
+    {
+        return currentGameMode == GameMode.Client;
     }
 
     // =========================
@@ -98,6 +190,9 @@ public class LobbyNetwork : MonoBehaviour
         await runner.Shutdown();
 
         runner = null;
+        currentRoomCode = string.Empty;
+        
+        Debug.Log("[LobbyNetwork] Sesión finalizada");
     }
 
     public NetworkRunner GetRunner()
