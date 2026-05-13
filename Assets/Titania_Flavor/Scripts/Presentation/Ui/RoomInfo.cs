@@ -1,17 +1,14 @@
 using UnityEngine;
 using Fusion;
-using TMPro;
 
 public class RoomInfo : MonoBehaviour
 {
-    [SerializeField]
-    private TMP_Text playerCountText;
+    private LobbyUIReferences ui;
 
-    [SerializeField]
-    private TMP_Text roomCodeText;
-
-    [SerializeField]
-    private GameObject roomInfoPanel;
+    private void Awake()
+    {
+        ui = LobbyUIReferences.Instance;
+    }
 
     private void OnEnable()
     {
@@ -29,10 +26,10 @@ public class RoomInfo : MonoBehaviour
 
     private void ShowRoomInfo(string roomName, string roomCode)
     {
-        if (roomInfoPanel != null)
-        {
-            roomInfoPanel.SetActive(true);
-        }
+        if (!TryGetUIReferences())
+            return;
+
+        ui.RoomInfoPanel.SetActive(true);
 
         UpdatePlayerCount(default);
         UpdateRoomCode(roomCode);
@@ -40,34 +37,55 @@ public class RoomInfo : MonoBehaviour
 
     private void UpdatePlayerCount(PlayerRef player)
     {
-        if (playerCountText != null)
-        {
-            int count = LobbyNetwork.Instance.GetPlayerCount();
-            playerCountText.text = $"Jugadores: {count}";
-        }
+        if (!TryGetUIReferences())
+            return;
+
+        int count = LobbyNetwork.Instance.GetPlayerCount();
+
+        ui.PlayerCountText.text =
+            $"Jugadores: {count}";
     }
 
     private void UpdateRoomCode(string roomCode)
     {
-        if (roomCodeText != null)
+        if (!TryGetUIReferences())
+            return;
+
+        if (LobbyNetwork.Instance.IsHost())
         {
-            if (LobbyNetwork.Instance.IsHost())
-            {
-                roomCodeText.text = $"Código: {roomCode}";
-                roomCodeText.gameObject.SetActive(true);
-            }
-            else
-            {
-                roomCodeText.gameObject.SetActive(false);
-            }
+            ui.RoomCodeText.text =
+                $"Código: {roomCode}";
+
+            ui.RoomCodeText.gameObject.SetActive(true);
+        }
+        else
+        {
+            ui.RoomCodeText.gameObject.SetActive(false);
         }
     }
 
     public void HideRoomInfo()
     {
-        if (roomInfoPanel != null)
+        if (!TryGetUIReferences())
+            return;
+
+        ui.RoomInfoPanel.SetActive(false);
+    }
+
+    private bool TryGetUIReferences()
+    {
+        if (ui == null)
         {
-            roomInfoPanel.SetActive(false);
+            ui = LobbyUIReferences.Instance;
         }
+
+        if (ui == null)
+        {
+            Debug.LogWarning(
+                "[RoomInfo] LobbyUIReferences no está disponible aún");
+            return false;
+        }
+
+        return true;
     }
 }

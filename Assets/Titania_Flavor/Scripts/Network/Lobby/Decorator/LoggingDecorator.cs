@@ -11,8 +11,6 @@ public class LoggingDecorator : LobbyDecorator
 
     public override async Task StartGame(StartGameContext context)
     {
-        Debug.Log($"Iniciando juego en modo {context.Mode} con sesión '{context.RoomCode}' y código de sala '{context.RoomCode}'");
-
         try
         {
             Debug.Log("Iniciando conexión...");
@@ -26,5 +24,7 @@ public class LoggingDecorator : LobbyDecorator
             Debug.LogError($"[Lobby] Error al iniciar juego: {ex.Message}\n{ex.StackTrace}");
             throw;
         }
+        
+        Debug.Log($"Iniciando juego en modo {context.Mode} con sesión '{context.RoomCode}' y código de sala '{context.RoomCode}'");
     }
 }

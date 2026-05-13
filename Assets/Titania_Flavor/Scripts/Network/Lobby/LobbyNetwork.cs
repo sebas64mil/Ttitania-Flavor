@@ -15,7 +15,9 @@ public class LobbyNetwork : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+
             DontDestroyOnLoad(gameObject);
+
             return;
         }
 
@@ -27,21 +29,26 @@ public class LobbyNetwork : MonoBehaviour
         StartGameAsync(GameMode.Host, sceneName, "");
     }
 
-
-
     public void JoinGame(string sceneName, string roomCode = "")
     {
         StartGameAsync(GameMode.Client, sceneName, roomCode);
     }
-    private async void StartGameAsync(GameMode mode, string sceneName, string roomCode = "")
+
+    private async void StartGameAsync(
+        GameMode mode,
+        string sceneName,
+        string roomCode = "")
     {
         if (runner != null)
         {
-            Debug.LogWarning("Ya existe un NetworkRunner activo");
+            Debug.LogWarning(
+                "Ya existe un NetworkRunner activo");
+
             return;
         }
 
         currentGameMode = mode;
+
         runner = gameObject.AddComponent<NetworkRunner>();
         runner.ProvideInput = true;
 
@@ -54,36 +61,49 @@ public class LobbyNetwork : MonoBehaviour
             SceneManager = null
         };
 
-        ILobbyStartHandler handler = new FusionStartHandler();
+        ILobbyStartHandler handler =
+            new FusionStartHandler();
+
         handler = new CallbackDecorator(handler);
+
         handler = new SceneDecorator(handler);
+
         handler = new RoomCodeDecorator(handler);
+
         handler = new LoggingDecorator(handler);
 
         try
         {
             await handler.StartGame(context);
 
+            LobbyEvents.OnFinishedLoading?.Invoke();
+
             currentRoomCode = context.RoomCode;
-            Debug.Log("Conexión completada");
+
+            Debug.Log(
+                "[LobbyNetwork] Conexión completada");
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[LobbyNetwork] Error al iniciar juego: {ex.Message}\n{ex.StackTrace}");
+            Debug.LogError(
+                $"[LobbyNetwork] Error al iniciar juego: " +
+                $"{ex.Message}\n{ex.StackTrace}");
 
             if (runner != null)
             {
                 Destroy(runner);
+
                 runner = null;
             }
         }
     }
-
     public int GetPlayerCount()
     {
         if (runner != null && runner.IsRunning)
         {
-            return runner.ActivePlayers.Count();
+            return runner
+                .ActivePlayers
+                .Count();
         }
 
         return 0;
@@ -118,18 +138,21 @@ public class LobbyNetwork : MonoBehaviour
     {
         return currentGameMode == GameMode.Client;
     }
-
     public async void Shutdown()
     {
         if (runner == null)
+        {
             return;
+        }
 
         await runner.Shutdown();
 
         runner = null;
+
         currentRoomCode = string.Empty;
 
-        Debug.Log("[LobbyNetwork] Sesión finalizada");
+        Debug.Log(
+            "[LobbyNetwork] Sesión finalizada");
     }
 
     public NetworkRunner GetRunner()
