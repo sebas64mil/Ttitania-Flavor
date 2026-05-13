@@ -22,45 +22,57 @@ public class LobbyNetwork : MonoBehaviour
         Destroy(gameObject);
     }
 
+    // =========================
+    // HOST
+    // =========================
 
-    public void HostGame()
+    public void HostGame(string sceneName)
     {
-        StartGame(GameMode.Host);
+        StartGame(GameMode.Host, sceneName);
+        GameManager.Instance.ChangeScene(sceneName);
     }
 
-    public void JoinGame()
+    // =========================
+    // CLIENT
+    // =========================
+
+    public void JoinGame(string sceneName)
     {
-        StartGame(GameMode.Client);
+        StartGame(GameMode.Client, sceneName);
+        GameManager.Instance.ChangeScene(sceneName);
     }
 
+    // =========================
+    // START
+    // =========================
 
-    private async void StartGame(GameMode mode)
+    private async void StartGame(GameMode mode, string sceneName)
     {
         if (runner != null)
             return;
-
 
         runner = gameObject.AddComponent<NetworkRunner>();
 
         runner.ProvideInput = true;
 
-
-        if (FusionCallbacks.Instance == null)
+        // CALLBACKS
+        if (GetComponent<FusionCallbacks>() == null)
         {
             gameObject.AddComponent<FusionCallbacks>();
         }
 
-
-        if (GetComponent<NetworkSceneManagerDefault>() == null)
-        {
+        // SCENE MANAGER
+        NetworkSceneManagerDefault sceneManager =
             gameObject.AddComponent<NetworkSceneManagerDefault>();
-        }
 
+        // OBTENER SCENE REF
+        int buildIndex = SceneUtility.GetBuildIndexByScenePath($"Assets/Titania_Flavor/Scenes/{sceneName}.unity");
 
+        SceneRef scene = SceneRef.FromIndex(buildIndex);
 
-        var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
-
-
+        Debug.Log($"Scene Path: Assets/Titania_Flavor/Scenes/{sceneName}.unity");
+        Debug.Log($"Build Index: {buildIndex}");
+        Debug.Log($"Scene Ref: {scene}");
 
         await runner.StartGame(new StartGameArgs()
         {
@@ -70,10 +82,13 @@ public class LobbyNetwork : MonoBehaviour
 
             Scene = scene,
 
-            SceneManager = GetComponent<NetworkSceneManagerDefault>()
+            SceneManager = sceneManager
         });
     }
 
+    // =========================
+    // SHUTDOWN
+    // =========================
 
     public async void Shutdown()
     {
@@ -82,10 +97,8 @@ public class LobbyNetwork : MonoBehaviour
 
         await runner.Shutdown();
 
-
         runner = null;
     }
-
 
     public NetworkRunner GetRunner()
     {

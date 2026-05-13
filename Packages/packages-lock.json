@@ -255,17 +255,6 @@
       },
       "url": "https://packages.unity.com"
     },
-    "com.unity.netcode": {
-      "version": "1.13.1",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.entities": "1.4.4",
-        "com.unity.transport": "2.5.3",
-        "com.unity.modules.animation": "1.0.0"
-      },
-      "url": "https://packages.unity.com"
-    },
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.6",
       "depth": 2,

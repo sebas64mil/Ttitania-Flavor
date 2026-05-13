@@ -42,6 +42,15 @@ public class FusionCallbacks : MonoBehaviour, INetworkRunnerCallbacks
     void INetworkRunnerCallbacks.OnConnectedToServer(NetworkRunner runner)
     {
         Debug.Log("Connected");
+
+        if (runner.GameMode == GameMode.Host)
+        {
+            LobbyEvents.OnStartHosting?.Invoke();
+        }
+        else if (runner.GameMode == GameMode.Client)
+        {
+            LobbyEvents.OnStartJoining?.Invoke();
+        }
     }
 
     void INetworkRunnerCallbacks.OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
@@ -69,7 +78,12 @@ public class FusionCallbacks : MonoBehaviour, INetworkRunnerCallbacks
 
     void INetworkRunnerCallbacks.OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
 
-    void INetworkRunnerCallbacks.OnSceneLoadDone(NetworkRunner runner) { }
+    void INetworkRunnerCallbacks.OnSceneLoadDone(NetworkRunner runner) 
+    {
+        Debug.Log("Scene loaded");
+
+        LobbyEvents.OnFinishedLoading?.Invoke();
+    }
 
     void INetworkRunnerCallbacks.OnSceneLoadStart(NetworkRunner runner) { }
 
