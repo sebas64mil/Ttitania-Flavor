@@ -97,6 +97,10 @@ public class FusionCallbacks : MonoBehaviour, INetworkRunnerCallbacks
 
         data.Direction = new Vector3(moveInput.x, 0, moveInput.y);
 
+        data.InteractPressed = PlayerInputHandler.InteractPressed;
+
+        PlayerInputHandler.InteractPressed = false;
+
         input.Set(data);
     }
     void INetworkRunnerCallbacks.OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
