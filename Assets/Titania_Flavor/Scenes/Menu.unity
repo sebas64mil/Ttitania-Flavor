@@ -1228,7 +1228,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f11a0238bfa538499ac57a1b1123a18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NameSceneLobby: Lobby
+  NameSceneLobby: Game
   roomNameInputField: {fileID: 2079733371}
   roomCodeInputField: {fileID: 1632824740}
   playerCountDisplay: {fileID: 391263387}
@@ -1265,7 +1265,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sessionListContainer: {fileID: 1368069147}
   sessionItemPrefab: {fileID: 3932080745518709503, guid: 45db8dedd97d6e44f968e698ebed471a, type: 3}
-  sceneNameToLoad: Lobby
+  sceneNameToLoad: Game
 --- !u!1 &727538517
 GameObject:
   m_ObjectHideFlags: 0

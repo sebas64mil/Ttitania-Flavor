@@ -8,6 +8,7 @@ public class LobbyNetwork : MonoBehaviour
 
     private NetworkRunner runner;
     private string currentRoomCode;
+    private string currentRoomName;
     private GameMode currentGameMode;
     private int maxPlayers = 4;
 
@@ -32,6 +33,7 @@ public class LobbyNetwork : MonoBehaviour
         int maxPlayersCount = 4)
     {
         maxPlayers = Mathf.Clamp(maxPlayersCount, 0, 4);
+        currentRoomName = roomName;
         LobbyEvents.OnStartHosting?.Invoke();
 
         StartGameAsync(
@@ -40,7 +42,6 @@ public class LobbyNetwork : MonoBehaviour
             "",
             maxPlayers);
     }
-
 
     public void JoinGame(
         string sceneName,
@@ -65,7 +66,7 @@ public class LobbyNetwork : MonoBehaviour
 
     private bool CanJoinGame()
     {
-        return runner == null;
+        return runner == null || !runner;
     }
 
     private async void StartGameAsync(
@@ -76,8 +77,16 @@ public class LobbyNetwork : MonoBehaviour
     {
         if (runner != null)
         {
-            Debug.LogWarning("Ya existe un NetworkRunner activo");
-            return;
+            if (runner.IsRunning)
+            {
+                Debug.LogWarning("Ya existe un NetworkRunner activo");
+                return;
+            }
+
+            Destroy(runner);
+            runner = null;
+
+            await Awaitable.NextFrameAsync();
         }
 
         if (Instance == null || Instance.gameObject == null)
@@ -130,10 +139,18 @@ public class LobbyNetwork : MonoBehaviour
 
     public void ResetLobbyState()
     {
+        if (runner != null)
+        {
+            Destroy(runner);
+        }
+
         runner = null;
+
         currentRoomCode = string.Empty;
+        currentRoomName = string.Empty;
         currentGameMode = 0;
         maxPlayers = 4;
+
         GameManager.Instance.ChangeScene("Menu");
     }
 
@@ -155,6 +172,11 @@ public class LobbyNetwork : MonoBehaviour
     public string GetRoomCode()
     {
         return currentRoomCode;
+    }
+
+    public string GetRoomName()
+    {
+        return currentRoomName;
     }
 
     public string GetSessionName()

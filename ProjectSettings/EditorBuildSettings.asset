@@ -10,10 +10,7 @@ EditorBuildSettings:
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
     path: Assets/Titania_Flavor/Scenes/Game.unity
-    guid: 47ecf30e329a81348bf28e3444ebe5a5
-  - enabled: 1
-    path: Assets/Titania_Flavor/Scenes/Lobby.unity
     guid: 365b4c5c34d6688469457963cae132cf
   m_configObjects:
-    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 75447bd259bb2fd4db9065044dabfef9, type: 3}
   m_UseUCBPForAssetBundles: 0

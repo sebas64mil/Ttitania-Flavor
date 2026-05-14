@@ -64,11 +64,9 @@ public class FusionCallbacks : MonoBehaviour, INetworkRunnerCallbacks
 
         LobbyEvents.OnDisconnected?.Invoke();
 
-        if (LobbyNetwork.Instance.IsClient())
-        {
-            Debug.Log("[FusionCallbacks] Cliente normal desconectándose");
-            LobbyNetwork.Instance.ResetLobbyState();
-        }
+        Debug.Log("[FusionCallbacks] Cliente normal desconectándose");
+        LobbyNetwork.Instance.ResetLobbyState();
+
 
         isShuttingDown = false;
     }
@@ -91,24 +89,24 @@ public class FusionCallbacks : MonoBehaviour, INetworkRunnerCallbacks
             request.Accept();
         }
     }
+    void INetworkRunnerCallbacks.OnInput(NetworkRunner runner, NetworkInput input)
+    {
+        var data = new NetworkInputData();
 
-    void INetworkRunnerCallbacks.OnInput(NetworkRunner runner, NetworkInput input) { }
+        Vector2 moveInput = PlayerInputHandler.MoveInput;
 
+        data.Direction = new Vector3(moveInput.x, 0, moveInput.y);
+
+        input.Set(data);
+    }
     void INetworkRunnerCallbacks.OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
 
     void INetworkRunnerCallbacks.OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
         Debug.Log($"[FusionCallbacks] NetworkRunner Shutdown. Reason: {shutdownReason}");
 
-        isShuttingDown = true;
-
-        if (LobbyNetwork.Instance.IsClient())
-        {
-            Debug.Log("[FusionCallbacks] Cliente desconectado por OnShutdown");
-            LobbyNetwork.Instance.ResetLobbyState();
-        }
-
-        isShuttingDown = false;
+        LobbyNetwork.Instance.ResetLobbyState();
+    
     }
 
     void INetworkRunnerCallbacks.OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
@@ -155,6 +153,10 @@ public class FusionCallbacks : MonoBehaviour, INetworkRunnerCallbacks
 
         if (!isShuttingDown)
         {
+            string roomName = LobbyNetwork.Instance.GetRoomName();
+            string roomCode = LobbyNetwork.Instance.GetRoomCode();
+            
+            LobbyEvents.OnRoomCreated?.Invoke(roomName, roomCode);
             LobbyEvents.OnFinishedLoading?.Invoke();
         }
     }

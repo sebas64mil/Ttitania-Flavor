@@ -25,6 +25,9 @@ public class LobbyUIReferences : MonoBehaviour
     [SerializeField]
     private TMP_Text roomCodeText;
 
+    [SerializeField]
+    private TMP_Text roomNameText;
+
     private void Awake()
     {
         Instance = this;
@@ -37,4 +40,6 @@ public class LobbyUIReferences : MonoBehaviour
 
     public TMP_Text PlayerCountText => playerCountText;
     public TMP_Text RoomCodeText => roomCodeText;
+
+    public TMP_Text RoomNameText => roomNameText;
 }

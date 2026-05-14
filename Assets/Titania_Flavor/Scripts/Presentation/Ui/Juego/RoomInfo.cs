@@ -32,6 +32,25 @@ public class RoomInfo : MonoBehaviour
         ui.RoomInfoPanel.SetActive(true);
 
         UpdatePlayerCount(default);
+
+        string nameToShow = roomName;
+
+        if (string.IsNullOrEmpty(nameToShow) && LobbyNetwork.Instance != null)
+        {
+            nameToShow = LobbyNetwork.Instance.GetRoomName();
+        }
+
+        if (string.IsNullOrEmpty(nameToShow) && LobbyNetwork.Instance != null)
+        {
+            nameToShow = LobbyNetwork.Instance.GetSessionName();
+        }
+
+        if (string.IsNullOrEmpty(nameToShow))
+        {
+            nameToShow = roomCode;
+        }
+
+        UpdateRoomName(nameToShow);
         UpdateRoomCode(roomCode);
     }
 
@@ -41,9 +60,10 @@ public class RoomInfo : MonoBehaviour
             return;
 
         int count = LobbyNetwork.Instance.GetPlayerCount();
+        int maxPlayers = LobbyNetwork.Instance.GetMaxPlayers();
 
         ui.PlayerCountText.text =
-            $"Jugadores: {count}";
+            $"{count}/{maxPlayers}";
     }
 
     private void UpdateRoomCode(string roomCode)
@@ -64,12 +84,51 @@ public class RoomInfo : MonoBehaviour
         }
     }
 
+    private void UpdateRoomName(string roomName)
+    {
+        if (!TryGetUIReferences())
+            return;
+
+        if (!LobbyNetwork.Instance.IsHost())
+        {
+
+            ui.RoomNameText.gameObject.SetActive(true);
+            return;
+        }
+        else
+        {
+            ui.RoomNameText.gameObject.SetActive(false);
+        }
+
+        if (string.IsNullOrEmpty(roomName))
+        {
+            ui.RoomNameText.gameObject.SetActive(false);
+            ui.RoomNameText.text = string.Empty;
+            return;
+        }
+
+        ui.RoomNameText.text = $"Sala: {roomName}";
+        ui.RoomNameText.gameObject.SetActive(true);
+    }
+
     public void HideRoomInfo()
     {
         if (!TryGetUIReferences())
             return;
 
         ui.RoomInfoPanel.SetActive(false);
+
+        if (ui.RoomNameText != null)
+        {
+            ui.RoomNameText.gameObject.SetActive(false);
+            ui.RoomNameText.text = string.Empty;
+        }
+
+        if (ui.RoomCodeText != null)
+        {
+            ui.RoomCodeText.gameObject.SetActive(false);
+            ui.RoomCodeText.text = string.Empty;
+        }
     }
 
     private bool TryGetUIReferences()
