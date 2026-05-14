@@ -12,10 +12,25 @@ public class LobbyUI : MonoBehaviour
     [SerializeField]
     private TMP_InputField roomCodeInputField;
 
+    [SerializeField]
+    private TMP_Text playerCountDisplay;
+
+    private int currentMaxPlayers = 4;
+    private const int MIN_PLAYERS = 2;
+    private const int MAX_PLAYERS = 4;
+
+    private void Start()
+    {
+        if (playerCountDisplay != null)
+        {
+            UpdatePlayerCountDisplay();
+        }
+    }
+
     public void HostGame()
     {
         string roomName = GetRoomName();
-        LobbyNetwork.Instance.HostGame(NameSceneLobby, roomName);
+        LobbyNetwork.Instance.HostGame(NameSceneLobby, roomName, currentMaxPlayers);
     }
 
     public void JoinGame()
@@ -37,9 +52,58 @@ public class LobbyUI : MonoBehaviour
         LobbyNetwork.Instance.JoinGame(NameSceneLobby, roomCode);
     }
 
-    public void Shutdown()
+    public void IncreasePlayerCount()
     {
-        LobbyNetwork.Instance.Shutdown();
+        if (currentMaxPlayers < MAX_PLAYERS)
+        {
+            currentMaxPlayers++;
+            UpdatePlayerCountDisplay();
+            Debug.Log($"Máximo de jugadores aumentado a: {currentMaxPlayers}");
+        }
+        else
+        {
+            Debug.LogWarning($"Ya se alcanzó el máximo de {MAX_PLAYERS} jugadores");
+        }
+    }
+
+    public void DecreasePlayerCount()
+    {
+        if (currentMaxPlayers > MIN_PLAYERS)
+        {
+            currentMaxPlayers--;
+            UpdatePlayerCountDisplay();
+            Debug.Log($"Máximo de jugadores disminuido a: {currentMaxPlayers}");
+        }
+        else
+        {
+            Debug.LogWarning($"Ya se alcanzó el mínimo de {MIN_PLAYERS} jugadores");
+        }
+    }
+
+    public int GetMaxPlayerCount()
+    {
+        return currentMaxPlayers;
+    }
+
+    public void SetMaxPlayerCount(int count)
+    {
+        if (count >= MIN_PLAYERS && count <= MAX_PLAYERS)
+        {
+            currentMaxPlayers = count;
+            UpdatePlayerCountDisplay();
+        }
+        else
+        {
+            Debug.LogWarning($"El número de jugadores debe estar entre {MIN_PLAYERS} y {MAX_PLAYERS}");
+        }
+    }
+
+    private void UpdatePlayerCountDisplay()
+    {
+        if (playerCountDisplay != null)
+        {
+            playerCountDisplay.text = $"{currentMaxPlayers}";
+        }
     }
 
     public string GetRoomName()

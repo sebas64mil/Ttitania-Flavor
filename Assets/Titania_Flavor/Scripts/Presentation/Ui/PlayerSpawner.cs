@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 
+
 public class PlayerSpawner : MonoBehaviour
 {
     [SerializeField] private NetworkPrefabRef playerPrefab;
-
     [SerializeField] private Transform[] spawnPoints;
 
     private Dictionary<PlayerRef, NetworkObject> spawnedPlayers =
@@ -30,7 +30,6 @@ public class PlayerSpawner : MonoBehaviour
         if (runner == null)
             return;
 
-        // SOLO EL HOST SPAWNEA
         if (!runner.IsServer)
             return;
 
@@ -56,7 +55,6 @@ public class PlayerSpawner : MonoBehaviour
         if (spawnedPlayers.TryGetValue(player, out NetworkObject playerObject))
         {
             runner.Despawn(playerObject);
-
             spawnedPlayers.Remove(player);
         }
     }
@@ -67,7 +65,6 @@ public class PlayerSpawner : MonoBehaviour
             return Vector3.zero;
 
         int index = player.RawEncoded % spawnPoints.Length;
-
         return spawnPoints[index].position;
     }
 
@@ -75,6 +72,7 @@ public class PlayerSpawner : MonoBehaviour
     {
         if (spawnPoints == null)
             return;
+
         Gizmos.color = Color.green;
         foreach (Transform spawnPoint in spawnPoints)
         {

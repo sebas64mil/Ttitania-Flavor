@@ -32,4 +32,5 @@ public class LobbyLoadingUI : MonoBehaviour
     {
         ui.LoadingPanel.SetActive(false);
     }
+
 }

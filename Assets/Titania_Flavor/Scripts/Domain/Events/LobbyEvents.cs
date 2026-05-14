@@ -1,5 +1,6 @@
-using System;
 using Fusion;
+using Fusion.Sockets;
+using System;
 
 public static class LobbyEvents
 {
@@ -16,4 +17,6 @@ public static class LobbyEvents
     public static Action<int> OnPlayerCountChanged;
 
     public static Action<string, string> OnRoomCreated;
+
+    public static Action OnDisconnected;
 }
