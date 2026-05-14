@@ -1,6 +1,6 @@
 using Fusion;
-using Fusion.Sockets;
 using System;
+using System.Collections.Generic;
 
 public static class LobbyEvents
 {
@@ -19,4 +19,8 @@ public static class LobbyEvents
     public static Action<string, string> OnRoomCreated;
 
     public static Action OnDisconnected;
+
+    public static Action<List<SessionInfo>> OnSessionListUpdated;
+
+    public static Action<SessionInfo> OnSessionSelected;
 }

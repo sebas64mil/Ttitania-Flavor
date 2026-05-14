@@ -125,7 +125,22 @@ public class FusionCallbacks : MonoBehaviour, INetworkRunnerCallbacks
 
     void INetworkRunnerCallbacks.OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
 
-    void INetworkRunnerCallbacks.OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
+
+    void INetworkRunnerCallbacks.OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
+    {
+        Debug.Log($"[FusionCallbacks] Session List Updated. Total sessions: {sessionList?.Count ?? 0}");
+
+        if (sessionList != null && sessionList.Count > 0)
+        {
+            foreach (var session in sessionList)
+            {
+                Debug.Log($"  - Session: {session.Name} | Players: {session.PlayerCount}/{session.MaxPlayers}");
+            }
+        }
+
+        // Invocar evento con la lista de sesiones
+        LobbyEvents.OnSessionListUpdated?.Invoke(sessionList ?? new List<SessionInfo>());
+    }
 
     void INetworkRunnerCallbacks.OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
 

@@ -41,6 +41,7 @@ public class LobbyNetwork : MonoBehaviour
             maxPlayers);
     }
 
+
     public void JoinGame(
         string sceneName,
         string roomCode = "")
@@ -104,7 +105,6 @@ public class LobbyNetwork : MonoBehaviour
         handler = new CallbackDecorator(handler);
         handler = new SceneDecorator(handler);
         handler = new RoomCodeDecorator(handler);
-        handler = new DisconnectServerDecoretor(handler);
 
         try
         {
