@@ -11,9 +11,6 @@ public class GrabbableObject : NetworkBehaviour, IGrabbable
     [HideInInspector]
     public PlayerRef Holder { get; set; }
 
-    [SerializeField]
-    private float followSpeed = 25f;
-
     private Rigidbody rb;
 
     private Transform targetHoldPoint;
@@ -27,17 +24,8 @@ public class GrabbableObject : NetworkBehaviour, IGrabbable
     {
         if (IsGrabbed && targetHoldPoint != null)
         {
-            transform.position = Vector3.Lerp(
-                transform.position,
-                targetHoldPoint.position,
-                Runner.DeltaTime * followSpeed
-            );
-
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                targetHoldPoint.rotation,
-                Runner.DeltaTime * followSpeed
-            );
+            rb.MovePosition(targetHoldPoint.position);
+            rb.MoveRotation(targetHoldPoint.rotation);
         }
     }
 
@@ -57,12 +45,16 @@ public class GrabbableObject : NetworkBehaviour, IGrabbable
 
         IsGrabbed = true;
 
-        rb.isKinematic = true;
-
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-
         targetHoldPoint = player.HoldPoint;
+
+
+        if (!rb.isKinematic)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        rb.isKinematic = true;
     }
 
     public void Drop()
